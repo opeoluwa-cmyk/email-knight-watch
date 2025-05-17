@@ -6,7 +6,9 @@ import {
   Mail, 
   Search, 
   Shield,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,60 +34,77 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
-// Mock email data
-const mockEmails = [
-  {
-    id: "e1",
-    sender: "paypal-service@secure-paypal.com",
-    subject: "Your PayPal account has been limited",
-    receivedAt: "2023-05-16T14:22:00",
-    status: "phishing",
-    score: 98,
-    content: "Dear valued customer, We've noticed some unusual activity in your PayPal account. Your account access has been limited. Please verify your information immediately by clicking the link below to avoid permanent suspension.",
-    indicators: ["Suspicious sender domain", "Urgent action requested", "Link mismatch"]
-  },
-  {
-    id: "e2",
-    sender: "noreply@amazon.com",
-    subject: "Your Amazon order #12345 has shipped",
-    receivedAt: "2023-05-15T09:15:00",
-    status: "safe",
-    score: 2,
-    content: "Hello, Your recent Amazon order #12345 has shipped and is on its way. You can track your package using the tracking number provided in your account. Thank you for shopping with Amazon!",
-    indicators: []
-  },
-  {
-    id: "e3",
-    sender: "microsoft365-noreply@microsoft.com",
-    subject: "Action required: Update your Microsoft password",
-    receivedAt: "2023-05-14T16:30:00",
-    status: "suspicious",
-    score: 65,
-    content: "Your Microsoft 365 password will expire in 2 days. To ensure uninterrupted access to your account, please update your password now. Click here to update your password securely.",
-    indicators: ["Password urgency", "External link"]
-  },
-  {
-    id: "e4",
-    sender: "security@facebook-mail.com",
-    subject: "Security alert: New login to your account",
-    receivedAt: "2023-05-14T11:45:00",
-    status: "phishing",
-    score: 95,
-    content: "We detected a login to your Facebook account from a new device in Russia. If this wasn't you, your account may be compromised. Click here to secure your account immediately.",
-    indicators: ["Suspicious sender domain", "Unusual location claim", "Urgency tactics"]
-  },
-  {
-    id: "e5",
-    sender: "newsletter@nytimes.com",
-    subject: "Breaking News: Latest Updates for May 14",
-    receivedAt: "2023-05-14T08:10:00",
-    status: "safe",
-    score: 3,
-    content: "Breaking News from The New York Times: Latest Updates for May 14. Read our top stories covering global events, politics, business, technology and more.",
-    indicators: []
-  }
-];
+// Generate more mock email data
+const generateMockEmails = (count) => {
+  const domains = [
+    "paypal-security.com", 
+    "amazon.com", 
+    "microsoft365-noreply.microsoft.com", 
+    "facebook-mail.com", 
+    "nytimes.com", 
+    "netflix-billing.com", 
+    "bank-of-america.co", 
+    "apple-support.org", 
+    "google-security.com", 
+    "dropbox-share.net"
+  ];
+  
+  const subjects = [
+    "Your account has been limited",
+    "Order confirmation",
+    "Security alert",
+    "Password reset required",
+    "Breaking News",
+    "Your subscription is expiring",
+    "Suspicious activity detected",
+    "Payment processed successfully",
+    "Document shared with you",
+    "Invitation to collaborate"
+  ];
+  
+  const statusTypes = ["safe", "suspicious", "phishing"];
+  
+  return Array.from({ length: count }).map((_, index) => {
+    const id = `e${index + 1}`;
+    const domainIndex = Math.floor(Math.random() * domains.length);
+    const subjectIndex = Math.floor(Math.random() * subjects.length);
+    const status = statusTypes[Math.floor(Math.random() * statusTypes.length)];
+    const score = status === "safe" ? Math.floor(Math.random() * 20) : 
+                 status === "suspicious" ? Math.floor(Math.random() * 35) + 30 : 
+                 Math.floor(Math.random() * 30) + 70;
+    
+    // Generate a random date within the last month
+    const date = new Date();
+    date.setDate(date.getDate() - Math.floor(Math.random() * 30));
+    
+    return {
+      id,
+      sender: `noreply@${domains[domainIndex]}`,
+      subject: subjects[subjectIndex],
+      receivedAt: date.toISOString(),
+      status,
+      score,
+      content: `This is a sample email content for ${subjects[subjectIndex]}. It contains information that may or may not be legitimate.`,
+      indicators: status !== "safe" ? [
+        "Suspicious sender domain",
+        "Unusual request format",
+        "Link mismatch"
+      ].slice(0, Math.floor(Math.random() * 3) + 1) : []
+    };
+  });
+};
+
+const mockEmails = generateMockEmails(52); // Generate 52 mock emails for pagination
 
 const statusColors = {
   safe: "text-green-700 bg-green-50 border-green-100",
@@ -99,9 +118,12 @@ const statusIcons = {
   phishing: <X className="h-4 w-4" />,
 };
 
+const ITEMS_PER_PAGE = 10;
+
 const Emails = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEmail, setSelectedEmail] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -126,6 +148,36 @@ const Emails = () => {
       email.sender.toLowerCase().includes(searchQuery.toLowerCase()) ||
       email.subject.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredEmails.length / ITEMS_PER_PAGE);
+  const paginatedEmails = filteredEmails.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Generate array of page numbers to display
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+    const halfMaxPages = Math.floor(maxPagesToShow / 2);
+    
+    let startPage = Math.max(1, currentPage - halfMaxPages);
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -166,59 +218,108 @@ const Emails = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredEmails.map((email) => (
-                <TableRow 
-                  key={email.id} 
-                  className="cursor-pointer hover:bg-gray-50"
-                  onClick={() => handleEmailSelect(email)}
-                >
-                  <TableCell className="font-medium truncate max-w-[180px]">
-                    {email.sender}
-                  </TableCell>
-                  <TableCell className="truncate max-w-[300px]">{email.subject}</TableCell>
-                  <TableCell>{formatDate(email.receivedAt)}</TableCell>
-                  <TableCell>
-                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[email.status]}`}>
-                      {statusIcons[email.status]}
-                      <span className="ml-1 capitalize">{email.status}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className={`text-sm font-medium ${
-                      email.score > 70 ? "text-red-600" : 
-                      email.score > 30 ? "text-amber-600" : "text-green-600"
-                    }`}>
-                      {email.score}%
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          ...
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={(e) => {
-                          e.stopPropagation();
-                          handleEmailSelect(email);
-                        }}>
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                          Mark as Safe
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                          Block Sender
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+              {paginatedEmails.length > 0 ? (
+                paginatedEmails.map((email) => (
+                  <TableRow 
+                    key={email.id} 
+                    className="cursor-pointer hover:bg-gray-50"
+                    onClick={() => handleEmailSelect(email)}
+                  >
+                    <TableCell className="font-medium truncate max-w-[180px]">
+                      {email.sender}
+                    </TableCell>
+                    <TableCell className="truncate max-w-[300px]">{email.subject}</TableCell>
+                    <TableCell>{formatDate(email.receivedAt)}</TableCell>
+                    <TableCell>
+                      <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[email.status]}`}>
+                        {statusIcons[email.status]}
+                        <span className="ml-1 capitalize">{email.status}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className={`text-sm font-medium ${
+                        email.score > 70 ? "text-red-600" : 
+                        email.score > 30 ? "text-amber-600" : "text-green-600"
+                      }`}>
+                        {email.score}%
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            ...
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            handleEmailSelect(email);
+                          }}>
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                            Mark as Safe
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                            Block Sender
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    No emails found matching your search.
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
+        </div>
+        
+        <div className="py-4 border-t">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))} 
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {getPageNumbers().map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    isActive={page === currentPage}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              
+              {currentPage + 2 < totalPages && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+          
+          <div className="text-xs text-center text-muted-foreground mt-2">
+            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredEmails.length)} of {filteredEmails.length} emails
+          </div>
         </div>
       </div>
 

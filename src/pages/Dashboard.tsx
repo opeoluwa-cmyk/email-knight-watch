@@ -15,6 +15,28 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 const statCards = [
   {
@@ -64,6 +86,24 @@ const recentAlerts = [
   },
 ];
 
+const emailChartData = [
+  { name: "Jan", total: 1023, phishing: 5 },
+  { name: "Feb", total: 1242, phishing: 8 },
+  { name: "Mar", total: 1321, phishing: 12 },
+  { name: "Apr", total: 1428, phishing: 6 },
+  { name: "May", total: 1553, phishing: 8 },
+  { name: "Jun", total: 1632, phishing: 15 },
+];
+
+const threatTypeData = [
+  { name: "Phishing", value: 42 },
+  { name: "Malware", value: 18 },
+  { name: "Spam", value: 65 },
+  { name: "Spoofing", value: 27 },
+];
+
+const COLORS = ["#FF5733", "#33C3F0", "#8E9196", "#1A1F2C"];
+
 const severityColors = {
   high: "text-red-500 bg-red-50 border-red-200",
   medium: "text-amber-500 bg-amber-50 border-amber-200",
@@ -104,72 +144,187 @@ const Dashboard = () => {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Security Status</CardTitle>
-            <CardDescription>Your current security performance</CardDescription>
+            <CardTitle>Email Traffic Overview</CardTitle>
+            <CardDescription>Last 6 months of email activity</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium">Phishing Protection</div>
-                  <div className="text-sm text-muted-foreground">98%</div>
-                </div>
-                <Progress value={98} className="h-2" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium">Malware Detection</div>
-                  <div className="text-sm text-muted-foreground">85%</div>
-                </div>
-                <Progress value={85} className="h-2" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium">Account Security</div>
-                  <div className="text-sm text-muted-foreground">92%</div>
-                </div>
-                <Progress value={92} className="h-2" />
-              </div>
-            </div>
+          <CardContent className="h-[300px]">
+            <ChartContainer
+              config={{
+                total: { label: "Total Emails" },
+                phishing: { label: "Phishing Detected" },
+              }}
+            >
+              <LineChart data={emailChartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="name" stroke="#888888" fontSize={12} />
+                <YAxis stroke="#888888" fontSize={12} />
+                <ChartTooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="flex flex-col">
+                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                Total
+                              </span>
+                              <span className="font-bold text-[0.80rem]">
+                                {payload[0].value}
+                              </span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                Phishing
+                              </span>
+                              <span className="font-bold text-[0.80rem]">
+                                {payload[1].value}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="total"
+                  stroke="#33C3F0"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="phishing"
+                  stroke="#FF5733"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ChartContainer>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Recent Alerts</CardTitle>
-            <CardDescription>Latest security notifications</CardDescription>
+            <CardTitle>Threat Distribution</CardTitle>
+            <CardDescription>Breakdown by threat types</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentAlerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className={`flex items-center p-3 rounded-lg border ${
-                    severityColors[alert.severity]
-                  }`}
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={threatTypeData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  dataKey="value"
                 >
-                  {alert.severity === "high" ? (
-                    <AlertTriangle className="h-5 w-5 mr-3 flex-shrink-0" />
-                  ) : (
-                    <Info className="h-5 w-5 mr-3 flex-shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {alert.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {alert.source}
-                    </p>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {alert.time}
-                  </div>
-                </div>
-              ))}
-            </div>
+                  {threatTypeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                          <div className="flex flex-col">
+                            <span className="text-[0.70rem] uppercase text-muted-foreground">
+                              {payload[0].name}
+                            </span>
+                            <span className="font-bold text-[0.80rem]">
+                              {payload[0].value} detected
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Legend
+                  layout="vertical"
+                  verticalAlign="middle"
+                  align="right"
+                  wrapperStyle={{ paddingLeft: "10px" }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Security Status</CardTitle>
+          <CardDescription>Your current security performance</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium">Phishing Protection</div>
+                <div className="text-sm text-muted-foreground">98%</div>
+              </div>
+              <Progress value={98} className="h-2" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium">Malware Detection</div>
+                <div className="text-sm text-muted-foreground">85%</div>
+              </div>
+              <Progress value={85} className="h-2" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium">Account Security</div>
+                <div className="text-sm text-muted-foreground">92%</div>
+              </div>
+              <Progress value={92} className="h-2" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Alerts</CardTitle>
+          <CardDescription>Latest security notifications</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {recentAlerts.map((alert) => (
+              <div
+                key={alert.id}
+                className={`flex items-center p-3 rounded-lg border ${
+                  severityColors[alert.severity]
+                }`}
+              >
+                {alert.severity === "high" ? (
+                  <AlertTriangle className="h-5 w-5 mr-3 flex-shrink-0" />
+                ) : (
+                  <Info className="h-5 w-5 mr-3 flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {alert.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {alert.source}
+                  </p>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {alert.time}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
