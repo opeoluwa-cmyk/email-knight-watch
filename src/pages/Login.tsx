@@ -1,9 +1,10 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Google } from "lucide-react";
+import { Mail } from "lucide-react"; // Changed from Google to Mail
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import EmailKnightLogo from "@/components/EmailKnightLogo";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -24,13 +25,8 @@ const Login = () => {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-b from-white to-knight-lightblue px-4">
       <div className="w-full max-w-md text-center flex flex-col items-center animate-fade-in">
-        <div className="mb-8 flex items-center justify-center">
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-knight-blue to-knight-navy rounded-full blur-md"></div>
-            <div className="relative flex items-center justify-center h-24 w-24 rounded-full bg-gradient-to-br from-knight-navy via-knight-navy to-knight-blue shadow-lg">
-              <span className="font-extrabold text-5xl text-white">EK</span>
-            </div>
-          </div>
+        <div className="mb-8">
+          <EmailKnightLogo size="lg" />
         </div>
         
         <h1 className="text-3xl font-bold mb-2 text-knight-navy">Email Knight</h1>
@@ -43,7 +39,7 @@ const Login = () => {
             className="w-full py-6 flex items-center justify-center gap-3 bg-white border hover:bg-gray-50 text-gray-800"
             onClick={handleGoogleLogin}
           >
-            <Google size={20} />
+            <Mail size={20} /> {/* Changed from Google to Mail */}
             <span>Continue with Google</span>
           </Button>
           
