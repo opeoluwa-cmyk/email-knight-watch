@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Bell, Search, User } from "lucide-react";
+import { Bell, LogOut, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -12,13 +12,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
+import EmailKnightLogo from "./EmailKnightLogo";
 
 const Header = () => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate('/login');
+  };
 
   return (
     <header className="border-b border-gray-200 bg-white py-3 px-4 flex items-center justify-between">
-      <div className="flex-1 flex items-center">
+      <div className="flex-1 flex items-center gap-4">
+        {isMobile && (
+          <div className="flex-shrink-0">
+            <EmailKnightLogo size="sm" />
+          </div>
+        )}
+        
         {!isMobile && (
           <div className="max-w-md w-full relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -47,10 +60,13 @@ const Header = () => {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Log out</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
