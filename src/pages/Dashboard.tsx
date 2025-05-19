@@ -1,4 +1,3 @@
-
 import React from "react";
 import { 
   AlertTriangle, 
@@ -95,11 +94,9 @@ const emailChartData = [
   { name: "Jun", total: 1632, phishing: 15 },
 ];
 
-const threatTypeData = [
-  { name: "Phishing", value: 42 },
-  { name: "Malware", value: 18 },
-  { name: "Spam", value: 65 },
-  { name: "Spoofing", value: 27 },
+const phishingDistributionData = [
+  { name: "Legitimate", value: 3842, color: "#33C3F0" },
+  { name: "Phishing", value: 54, color: "#FF5733" }
 ];
 
 const COLORS = ["#FF5733", "#33C3F0", "#8E9196", "#1A1F2C"];
@@ -209,22 +206,22 @@ const Dashboard = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Threat Distribution</CardTitle>
-            <CardDescription>Breakdown by threat types</CardDescription>
+            <CardTitle>Email Security Analysis</CardTitle>
+            <CardDescription>Legitimate vs. Suspicious Emails</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={threatTypeData}
+                  data={phishingDistributionData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
                   outerRadius={100}
                   dataKey="value"
                 >
-                  {threatTypeData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  {phishingDistributionData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip
@@ -237,7 +234,7 @@ const Dashboard = () => {
                               {payload[0].name}
                             </span>
                             <span className="font-bold text-[0.80rem]">
-                              {payload[0].value} detected
+                              {payload[0].value} emails
                             </span>
                           </div>
                         </div>
