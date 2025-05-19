@@ -40,7 +40,7 @@ const Dashboard = () => {
       </div>
 
       <SecurityStatusSection />
-      <RecentAlertsSection alerts={recentAlerts} />
+      <RecentAlertsSection alerts={recentAlerts as any} />
       <SecurityTipsSection />
     </div>
   );
