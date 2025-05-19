@@ -8,7 +8,8 @@ import {
   Mail, 
   User, 
   Settings, 
-  Shield
+  Shield,
+  Archive
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -29,6 +30,11 @@ const Sidebar = () => {
       path: "/emails",
       name: "Emails",
       icon: <Mail size={20} />,
+    },
+    {
+      path: "/quarantine",
+      name: "Quarantine",
+      icon: <Archive size={20} />,
     },
     {
       path: "/profile",
