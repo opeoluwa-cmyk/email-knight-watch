@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   AlertTriangle, 
@@ -8,7 +7,10 @@ import {
   Shield,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Archive,
+  Trash,
+  Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +45,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 // Generate more mock email data
 const generateMockEmails = (count) => {
@@ -124,6 +129,7 @@ const Emails = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -136,7 +142,7 @@ const Emails = () => {
   };
 
   const handleEmailSelect = (email) => {
-    setSelectedEmail(email);
+    navigate(`/emails/${email.id}`);
   };
 
   const handleCloseDialog = () => {
@@ -179,6 +185,30 @@ const Emails = () => {
     return pages;
   };
 
+  const handleMarkSafe = (e, emailId) => {
+    e.stopPropagation();
+    toast({
+      title: "Email marked as safe",
+      description: "This email has been marked as legitimate"
+    });
+  };
+
+  const handleQuarantine = (e, emailId) => {
+    e.stopPropagation();
+    toast({
+      title: "Email quarantined",
+      description: "This email has been moved to quarantine"
+    });
+  };
+
+  const handleDelete = (e, emailId) => {
+    e.stopPropagation();
+    toast({
+      title: "Email deleted",
+      description: "This email has been permanently deleted"
+    });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -197,6 +227,15 @@ const Emails = () => {
           />
         </div>
         <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/quarantine')}
+            className="flex items-center gap-2"
+          >
+            <Archive className="h-4 w-4" />
+            View Quarantine
+          </Button>
           <Button variant="outline" size="sm">
             Refresh
           </Button>
@@ -214,7 +253,7 @@ const Emails = () => {
                 <TableHead className="w-[120px]">Received</TableHead>
                 <TableHead className="w-[100px]">Status</TableHead>
                 <TableHead className="w-[80px]">Risk Score</TableHead>
-                <TableHead className="w-[70px]"></TableHead>
+                <TableHead className="w-[150px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -245,28 +284,73 @@ const Emails = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            ...
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation();
-                            handleEmailSelect(email);
-                          }}>
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                            Mark as Safe
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                            Block Sender
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <TooltipProvider>
+                        <div className="flex space-x-1" onClick={(e) => e.stopPropagation()}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleEmailSelect(email)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>View details</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          
+                          {email.status !== "safe" && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={(e) => handleMarkSafe(e, email.id)}
+                                >
+                                  <Shield className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Mark as safe</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                          
+                          {email.status !== "phishing" && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={(e) => handleQuarantine(e, email.id)}
+                                >
+                                  <Archive className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Move to quarantine</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                          
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={(e) => handleDelete(e, email.id)}
+                              >
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Delete</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TooltipProvider>
                     </TableCell>
                   </TableRow>
                 ))
@@ -323,55 +407,7 @@ const Emails = () => {
         </div>
       </div>
 
-      <Dialog open={!!selectedEmail} onOpenChange={handleCloseDialog}>
-        {selectedEmail && (
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{selectedEmail.subject}</DialogTitle>
-              <DialogDescription className="text-sm">
-                From: {selectedEmail.sender}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4 mt-2">
-              <div className="flex justify-between items-center">
-                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[selectedEmail.status]}`}>
-                  {statusIcons[selectedEmail.status]}
-                  <span className="ml-1 capitalize">{selectedEmail.status}</span>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {formatDate(selectedEmail.receivedAt)}
-                </div>
-              </div>
-              
-              <div className="rounded-md bg-gray-50 p-4 text-sm">
-                {selectedEmail.content}
-              </div>
-              
-              {selectedEmail.indicators.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Risk Indicators:</h4>
-                  <ul className="space-y-1">
-                    {selectedEmail.indicators.map((indicator, index) => (
-                      <li key={index} className="flex text-sm">
-                        <AlertTriangle className="h-4 w-4 text-amber-500 mr-2 flex-shrink-0 mt-0.5" />
-                        {indicator}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              {selectedEmail.status === 'safe' && (
-                <div className="flex items-center text-green-600 text-sm">
-                  <Shield className="h-4 w-4 mr-2" />
-                  This email has been analyzed and appears to be safe.
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        )}
-      </Dialog>
+      {/* Remove the dialog as we now navigate to a dedicated page */}
     </div>
   );
 };
