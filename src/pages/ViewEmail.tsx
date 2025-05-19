@@ -280,7 +280,7 @@ const ViewEmail = () => {
                     ? (value === "PASS" ? "text-green-600" : "text-red-600") 
                     : ""
                 }>
-                  {value}
+                  {String(value)}
                 </span>
               </div>
             ))}
