@@ -1,6 +1,11 @@
 
 import { apiRequest } from './api';
 
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
 export interface AuthResponse {
   token: string;
   user: {
@@ -11,6 +16,18 @@ export interface AuthResponse {
 }
 
 export const authService = {
+  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    const response = await apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    
+    // Store token in localStorage
+    localStorage.setItem('authToken', response.token);
+    
+    return response;
+  },
+
   async googleLogin(token: string): Promise<AuthResponse> {
     const response = await apiRequest('/auth/google', {
       method: 'POST',

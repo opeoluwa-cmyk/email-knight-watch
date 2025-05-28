@@ -13,30 +13,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "@/hooks/use-toast";
 import EmailKnightLogo from "./EmailKnightLogo";
 
 const Header = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
-      });
-      navigate('/login');
-    } catch (error) {
-      toast({
-        title: "Logout failed",
-        description: "There was an error logging out. Please try again.",
-        variant: "destructive"
-      });
-    }
+  const handleLogout = () => {
+    navigate('/login');
   };
 
   return (
@@ -73,10 +57,8 @@ const Header = () => {
               <User className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-white">
-            <DropdownMenuLabel>
-              {user?.name || user?.email || 'My Account'}
-            </DropdownMenuLabel>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate('/profile')}>Profile</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>

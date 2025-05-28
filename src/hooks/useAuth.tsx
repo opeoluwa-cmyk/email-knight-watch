@@ -6,6 +6,7 @@ interface AuthContextType {
   user: AuthResponse['user'] | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  login: (credentials: { email: string; password: string }) => Promise<void>;
   googleLogin: (token: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -23,7 +24,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const userData = await authService.getCurrentUser();
           setUser(userData);
         } catch (error) {
-          console.error('Auth initialization failed:', error);
           // Token might be expired, remove it
           localStorage.removeItem('authToken');
         }
@@ -34,32 +34,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initAuth();
   }, []);
 
+  const login = async (credentials: { email: string; password: string }) => {
+    const response = await authService.login(credentials);
+    setUser(response.user);
+  };
+
   const googleLogin = async (token: string) => {
-    try {
-      const response = await authService.googleLogin(token);
-      setUser(response.user);
-    } catch (error) {
-      console.error('Google login failed:', error);
-      throw error;
-    }
+    const response = await authService.googleLogin(token);
+    setUser(response.user);
   };
 
   const logout = async () => {
-    try {
-      await authService.logout();
-      setUser(null);
-    } catch (error) {
-      console.error('Logout failed:', error);
-      // Even if logout fails on server, clear local state
-      setUser(null);
-      localStorage.removeItem('authToken');
-    }
+    await authService.logout();
+    setUser(null);
   };
 
   const value = {
     user,
     isAuthenticated: !!user,
     isLoading,
+    login,
     googleLogin,
     logout,
   };
