@@ -1,5 +1,5 @@
 
-const API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+import { config } from '@/config/environment';
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -9,7 +9,7 @@ class ApiError extends Error {
 }
 
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${config.apiBaseUrl}${endpoint}`;
   const token = localStorage.getItem('authToken');
   
   const defaultHeaders = {
