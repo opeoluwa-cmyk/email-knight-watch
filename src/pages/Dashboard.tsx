@@ -61,14 +61,14 @@ const Dashboard = () => {
       <div className="grid gap-6 md:grid-cols-3">
         <StatCard 
           title="Emails Scanned"
-          value={displayStats.scannedEmails}
+          value={String(displayStats.scannedEmails)}
           description="Last 24 hours"
           icon={statCards[0].icon}
           color={statCards[0].color}
         />
         <StatCard 
           title="Threats Detected"
-          value={displayStats.threatsDetected}
+          value={String(displayStats.threatsDetected)}
           description="Active threats blocked"
           icon={statCards[1].icon}
           color={statCards[1].color}

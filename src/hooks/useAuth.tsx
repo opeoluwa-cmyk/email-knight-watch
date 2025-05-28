@@ -6,7 +6,6 @@ interface AuthContextType {
   user: AuthResponse['user'] | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentials: { email: string; password: string }) => Promise<void>;
   googleLogin: (token: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -35,16 +34,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     initAuth();
   }, []);
 
-  const login = async (credentials: { email: string; password: string }) => {
-    try {
-      const response = await authService.login(credentials);
-      setUser(response.user);
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    }
-  };
-
   const googleLogin = async (token: string) => {
     try {
       const response = await authService.googleLogin(token);
@@ -71,7 +60,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     isAuthenticated: !!user,
     isLoading,
-    login,
     googleLogin,
     logout,
   };

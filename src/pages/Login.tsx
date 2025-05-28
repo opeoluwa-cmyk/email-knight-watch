@@ -1,7 +1,6 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,10 +8,7 @@ import EmailKnightLogo from "@/components/EmailKnightLogo";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, googleLogin, isLoading } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoginMode, setIsLoginMode] = useState(false);
+  const { googleLogin, isLoading } = useAuth();
   
   const handleGoogleLogin = async () => {
     try {
@@ -33,24 +29,6 @@ const Login = () => {
     }
   };
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await login({ email, password });
-      toast({
-        title: "Success",
-        description: "Logged in successfully!",
-      });
-      navigate('/');
-    } catch (error) {
-      toast({
-        title: "Login Failed",
-        description: "Invalid credentials. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-b from-white to-knight-lightblue px-4">
       <div className="w-full max-w-md text-center flex flex-col items-center animate-fade-in">
@@ -64,28 +42,6 @@ const Login = () => {
         <div className="w-full space-y-4 bg-white p-8 rounded-xl shadow-lg border">
           <h2 className="text-xl font-semibold mb-6">Sign in to continue</h2>
           
-          {isLoginMode && (
-            <form onSubmit={handleEmailLogin} className="space-y-4 mb-4">
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign in"}
-              </Button>
-            </form>
-          )}
-          
           <Button 
             className="w-full py-6 flex items-center justify-center gap-3 bg-white border hover:bg-gray-50 text-gray-800"
             onClick={handleGoogleLogin}
@@ -98,14 +54,6 @@ const Login = () => {
               <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
             </svg>
             <span>{isLoading ? "Signing in..." : "Continue with Google"}</span>
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            className="w-full text-sm"
-            onClick={() => setIsLoginMode(!isLoginMode)}
-          >
-            {isLoginMode ? "Use Google instead" : "Use email and password"}
           </Button>
           
           <div className="pt-4 text-sm text-center text-muted-foreground">
