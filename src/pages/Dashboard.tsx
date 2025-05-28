@@ -38,9 +38,9 @@ const Dashboard = () => {
 
   // Fallback to mock data if API fails
   const displayStats = stats || {
-    scannedEmails: statCards[0].value,
-    threatsDetected: statCards[1].value,
-    protectionScore: statCards[2].value
+    scannedEmails: parseInt(statCards[0].value.replace(',', '')),
+    threatsDetected: parseInt(statCards[1].value),
+    protectionScore: parseInt(statCards[2].value.replace('%', ''))
   };
 
   const displayAlerts = alerts || recentAlerts;
@@ -61,14 +61,14 @@ const Dashboard = () => {
       <div className="grid gap-6 md:grid-cols-3">
         <StatCard 
           title="Emails Scanned"
-          value={String(displayStats.scannedEmails)}
+          value={displayStats.scannedEmails.toLocaleString()}
           description="Last 24 hours"
           icon={statCards[0].icon}
           color={statCards[0].color}
         />
         <StatCard 
           title="Threats Detected"
-          value={String(displayStats.threatsDetected)}
+          value={displayStats.threatsDetected.toString()}
           description="Active threats blocked"
           icon={statCards[1].icon}
           color={statCards[1].color}
