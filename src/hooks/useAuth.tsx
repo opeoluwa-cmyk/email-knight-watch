@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const userData = await authService.getCurrentUser();
           setUser(userData);
         } catch (error) {
+          console.error('Auth initialization failed:', error);
           // Token might be expired, remove it
           localStorage.removeItem('authToken');
         }
@@ -35,18 +36,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (credentials: { email: string; password: string }) => {
-    const response = await authService.login(credentials);
-    setUser(response.user);
+    try {
+      const response = await authService.login(credentials);
+      setUser(response.user);
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   };
 
   const googleLogin = async (token: string) => {
-    const response = await authService.googleLogin(token);
-    setUser(response.user);
+    try {
+      const response = await authService.googleLogin(token);
+      setUser(response.user);
+    } catch (error) {
+      console.error('Google login failed:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
-    await authService.logout();
-    setUser(null);
+    try {
+      await authService.logout();
+      setUser(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Even if logout fails on server, clear local state
+      setUser(null);
+      localStorage.removeItem('authToken');
+    }
   };
 
   const value = {

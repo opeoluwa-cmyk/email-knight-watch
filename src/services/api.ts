@@ -17,19 +17,29 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     ...(token && { Authorization: `Bearer ${token}` }),
   };
 
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...defaultHeaders,
+        ...options.headers,
+      },
+    });
 
-  if (!response.ok) {
-    throw new ApiError(response.status, `API Error: ${response.statusText}`);
+    if (!response.ok) {
+      throw new ApiError(response.status, `API Error: ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    
+    // Handle network errors or other fetch failures
+    console.error('API request failed:', error);
+    throw new ApiError(0, 'Network error or server unavailable');
   }
-
-  return response.json();
 };
 
 export { apiRequest, ApiError };
